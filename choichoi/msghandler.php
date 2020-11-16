@@ -72,7 +72,7 @@ function handle_catselect_status($userId, $message_text, $session) {
         return "サブカテゴリーを選択してください";
     }
     update_session($userId, "SUBCATSELECT", $categoryId, $subcategoryId, 0, 0, 0);
-    $quizes = get_quizes($categoryId, $subcategoryId);
+    $quizes = get_quizes($subcategoryId);
     return create_quizselect_msg($quizes);
 }
 
@@ -82,8 +82,8 @@ function handle_subcatselect_status($userId, $message_text, $session) {
     }
     $categoryId = $session["categoryId"];
     $subcategoryId = $session["subcategoryId"];
-    $quizMapId = (int)$message_text;
-    $quiz = get_quiz($categoryId, $subcategoryId, $quizMapId);
+    $quizOrder = (int)$message_text;
+    $quiz = get_quiz($subcategoryId, $quizOrder);
     if($quiz === []) {
         return "クイズ番号を選択してください";
     }
@@ -181,7 +181,7 @@ function create_subcatselect_msg($subcategories) {
 function create_quizselect_msg($quizes) {
     $msg = "クイズ番号を選択してください";
     foreach($quizes as $quiz) {
-        $msg .= "\n" . $quiz["quizMapId"] . ". " . $quiz["quizName"];
+        $msg .= "\n" . $quiz["quizOrder"] . ". " . $quiz["quizName"];
     }
     return $msg;
 }

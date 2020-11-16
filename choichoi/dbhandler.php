@@ -185,13 +185,13 @@ function get_subcategory($categoryId, $subcategoryId) {
     return $subcategory;
 }
 
-function get_quizes($categoryId, $subcategoryId) {
+function get_quizes($subcategoryId) {
     global $servername, $dbuser, $dbpass, $dbname;
     $mysqli = new mysqli($servername, $dbuser, $dbpass, $dbname);
     if ($mysqli->connect_errno) {
         exit();
     }
-    $sql = "select m.quizMapId, q.quizName from quizbot_category_quiz_map m inner join quizbot_quiz q on m.quizId = q.quizId where m.categoryId=$categoryId and m.subcategoryId=$subcategoryId order by m.quizMapId";
+    $sql = "select quizOrder, quizName from quizbot_quiz where subcategoryId=$subcategoryId order by quizOrder";
     $mysqli->query($sql);
     
     $quizes = [];
@@ -199,7 +199,7 @@ function get_quizes($categoryId, $subcategoryId) {
         if ($result->num_rows > 0) {
             while($row = $result->fetch_array(MYSQLI_NUM)) {
                 $quizes[] = [
-                    "quizMapId" => $row[0],
+                    "quizOrder" => $row[0],
                     "quizName" => $row[1]
                 ];
                 
@@ -211,13 +211,13 @@ function get_quizes($categoryId, $subcategoryId) {
     return $quizes;
 }
 
-function get_quiz($categoryId, $subcategoryId, $quizMapId) {
+function get_quiz($subcategoryId, $quizOrder) {
     global $servername, $dbuser, $dbpass, $dbname;
     $mysqli = new mysqli($servername, $dbuser, $dbpass, $dbname);
     if ($mysqli->connect_errno) {
         exit();
     }
-    $sql = "select q.quizId, q.quizName from quizbot_category_quiz_map m inner join quizbot_quiz q on m.quizId = q.quizId where m.categoryId=$categoryId and m.subcategoryId=$subcategoryId and m.quizMapId=$quizMapId";
+    $sql = "select quizId, quizName from quizbot_quiz where subcategoryId=$subcategoryId and quizOrder=$quizOrder";
     $mysqli->query($sql);
     
     $quiz = [];
