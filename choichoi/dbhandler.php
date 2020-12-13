@@ -140,7 +140,7 @@ function get_subcategories($categoryId) {
     if ($mysqli->connect_errno) {
         exit();
     }
-    $sql = "select categoryId, subcategoryId, subcategoryName from quizbot_sub_category where categoryId=$categoryId order by subcategoryId";
+    $sql = "select subcategoryId, subcategoryName, categoryId, categoryOrder from quizbot_sub_category where categoryId=$categoryId order by categoryOrder";
     $mysqli->query($sql);
     
     $subcategories = [];
@@ -148,9 +148,10 @@ function get_subcategories($categoryId) {
         if ($result->num_rows > 0) {
             while($row = $result->fetch_array(MYSQLI_NUM)) {
                 $subcategories[] = [
-                    "categoryId" => $row[0],
-                    "subcategoryId" => $row[1],
-                    "subcategoryName" => $row[2]
+                    "subcategoryId" => $row[0],
+                    "subcategoryName" => $row[1],
+                    "categoryId" => $row[2],
+                    "categoryOrder" => $row[3]
                 ];
             }
         }
@@ -160,13 +161,13 @@ function get_subcategories($categoryId) {
     return $subcategories;
 }
 
-function get_subcategory($categoryId, $subcategoryId) {
+function get_subcategory($categoryId, $categoryOrder) {
     global $servername, $dbuser, $dbpass, $dbname;
     $mysqli = new mysqli($servername, $dbuser, $dbpass, $dbname);
     if ($mysqli->connect_errno) {
         exit();
     }
-    $sql = "select categoryId, subcategoryId, subcategoryName from quizbot_sub_category where categoryId=$categoryId and subcategoryId=$subcategoryId";
+    $sql = "select subcategoryId, subcategoryName, categoryId, categoryOrder from quizbot_sub_category where categoryId=$categoryId and categoryOrder=$categoryOrder";
     $mysqli->query($sql);
     
     $subcategory = [];
@@ -174,9 +175,10 @@ function get_subcategory($categoryId, $subcategoryId) {
         if ($result->num_rows > 0) {
             $row = $result->fetch_array(MYSQLI_NUM);
             $subcategory = [
-                "categoryId" => $row[0],
-                "subcategoryId" => $row[1],
-                "subcategoryName" => $row[2]
+                "subcategoryId" => $row[0],
+                "subcategoryName" => $row[1],
+                "categoryId" => $row[2],
+                "categoryOrder" => $row[3]
             ];
         }
         $result->free();
@@ -268,7 +270,10 @@ function get_answer($quizId, $quizNum) {
     if ($mysqli->connect_errno) {
         exit();
     }
-    $sql = "select answer, explanation from quizbot_question where quizId=$quizId and quizNum=$quizNum";
+    $sql = "select answer, explanation," 
+        . " case answer when 1 then choice1 when 2 then choice2" 
+        . " when 3 then choice3 when 4 then choice4 end as choice" 
+        . " from quizbot_question where quizId=$quizId and quizNum=$quizNum";
     $mysqli->query($sql);
     
     $question = [];
@@ -277,7 +282,8 @@ function get_answer($quizId, $quizNum) {
             $row = $result->fetch_array(MYSQLI_NUM);
             $question = [
                 "answer" => $row[0],
-                "explanation" => $row[1]
+                "explanation" => $row[1],
+                "answerChoice" => $row[2]
             ];
         }
         $result->free();

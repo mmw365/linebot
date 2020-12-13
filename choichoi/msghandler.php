@@ -12,7 +12,9 @@ function process_message($userId, $message_text) {
         $message_text = "3";
     } else if($message_text == "え") {
         $message_text = "4";
-    } else if($message_text == "q" || $message_text == "9") {
+    } else if($message_text == "お") {
+        $message_text = "5";
+    } else if($message_text == "q" || $message_text == "0") {
         update_session($userId, "INIT", 0, 0, 0, 0, 0);
         $msg = "クイズを終了してカテゴリ選択に戻ります。\n\n";
         $categories = get_categories();
@@ -66,11 +68,12 @@ function handle_catselect_status($userId, $message_text, $session) {
         return "サブカテゴリーを選択してください";
     }
     $categoryId = $session["categoryId"];
-    $subcategoryId = (int)$message_text;
-    $subcategory = get_subcategory($categoryId, $subcategoryId);
+    $categoryOrder = (int)$message_text;
+    $subcategory = get_subcategory($categoryId, $categoryOrder);
     if($subcategory === []) {
         return "サブカテゴリーを選択してください";
     }
+    $subcategoryId =$subcategory["subcategoryId"];
     update_session($userId, "SUBCATSELECT", $categoryId, $subcategoryId, 0, 0, 0);
     $quizes = get_quizes($subcategoryId);
     return create_quizselect_msg($quizes);
@@ -112,7 +115,7 @@ function handle_quizselected_status($userId, $message_text, $session) {
         $msg = "正解です。\n";
         $point += 1;
     } else {
-        $msg = "不正解。正解は" . $answer["answer"] . "です。\n";
+        $msg = "不正解。正解は" . $answer["answer"] . ":「" . $answer["answerChoice"] . "」です。\n";
     }
     if($answer["explanation"] != '') {
         $msg .= $answer["explanation"] . "\n";
@@ -174,7 +177,7 @@ function create_catselect_msg($categories) {
 function create_subcatselect_msg($subcategories) {
     $msg = "サブカテゴリーを選択してください";
     foreach($subcategories as $subcategory) {
-        $msg .= "\n" . $subcategory["subcategoryId"] . ". " . $subcategory["subcategoryName"];
+        $msg .= "\n" . $subcategory["categoryOrder"] . ". " . $subcategory["subcategoryName"];
     }
     return $msg;}
 
