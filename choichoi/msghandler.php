@@ -191,9 +191,10 @@ function create_quizselect_msg($quizes) {
 
 function create_question_msg($question) {
     $msg = "【問題】" . $question["question"];
+    $choiseChar = [1 => "あ", 2 => "い", 3 => "う", 4 => "え"];
     foreach (array(1, 2, 3, 4) as $i) {
         if($question["choice" . $i] != "") {
-            $msg .= "\n$i. " . $question["choice" . $i];
+            $msg .= "\n$i($choiseChar[$i]). " . $question["choice" . $i];
         }
     }
     return $msg;
