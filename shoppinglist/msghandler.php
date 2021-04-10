@@ -162,7 +162,7 @@ function process_clear_message($userId) {
     $listId = get_list_id_selected($userId);
     $refInfo = get_list_referencing_info($userId, $listId);
     if(count($refInfo) > 0) {
-        return ["共有リストは変更できません"];
+        return ["共有リストのクリアはできません"];
     }
     delete_all_items($userId, $listId);
     delete_list_name($userId, $listId);
