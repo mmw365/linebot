@@ -9,12 +9,28 @@ function handle_notification($notification) {
     if($type == "UPDATE") {
         $ret = [];
         $listContent = "リストが更新されました\n" . get_list_for_user($userId);
-        $sharedInfo = get_list_shared_info($userId, $listId);
+        
+        $shareInfo = get_list_share_info($userId, $listId);
+        if(count($shareInfo) > 0) {
+            $tmpUserId = $shareInfo["refUserId"];
+            $tmpListId = $shareInfo["refListId"];
+            $selectedListId = get_list_id_selected($tmpUserId);
+            if($tmpListId == $selectedListId) {
+                $ret[] = [
+                    "userId" => $tmpUserId,
+                    "msg" => $listContent
+                ];
+            }
+            $sharedInfo = get_list_shared_info($tmpUserId, $tmpListId);
+        } else  {
+            $sharedInfo = get_list_shared_info($userId, $listId);
+        }
+            
         foreach($sharedInfo as $info) {
             $tmpUserId = $info["userId"];
             $tmpListId = $info["listId"];
             $selectedListId = get_list_id_selected($tmpUserId);
-            if($tmpListId == $selectedListId) {
+            if($tmpListId == $selectedListId && $tmpUserId != $userId) {
                 $ret[] = [
                     "userId" => $tmpUserId,
                     "msg" => $listContent

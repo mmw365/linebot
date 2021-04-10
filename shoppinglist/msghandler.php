@@ -62,13 +62,18 @@ function process_add_message($userId, $message_text) {
     $listId = get_list_id_selected($userId);
     $shareInfo = get_list_share_info($userId, $listId);
     if(count($shareInfo) > 0) {
-        return ["共有リストは変更できません"];
+        $retMsg = add_item($shareInfo["refUserId"], $shareInfo["refListId"], $message_text);
+    } else {
+        $retMsg = add_item($userId, $listId, $message_text);
     }
-    $retMsg = add_item($userId, $listId, $message_text);
     if($retMsg == "") {
-        $sharedInfo = get_list_shared_info($userId, $listId);
-        if(count($sharedInfo) > 0) {
+        if(count($shareInfo) > 0) {
             set_notification("UPDATE", $userId, $listId);
+        } else {
+            $sharedInfo = get_list_shared_info($userId, $listId);
+            if(count($sharedInfo) > 0) {
+                set_notification("UPDATE", $userId, $listId);
+            }
         }
         return ["「${message_text}」を追加しました。"];
     } else {
@@ -124,10 +129,11 @@ function process_delete_message($userId, $number_list) {
     $listId = get_list_id_selected($userId);
     $shareInfo = get_list_share_info($userId, $listId);
     if(count($shareInfo) > 0) {
-        return ["共有リストは変更できません"];
-    }
+        $item_detail = delete_items_by_number($shareInfo["refUserId"], $shareInfo["refListId"], $number_list);
+    } else {
+        $item_detail = delete_items_by_number($userId, $listId, $number_list);
+    }        
     
-    $item_detail = delete_items_by_number($userId, $listId, $number_list);
     $msg = "";
     $isFirst = true;
     foreach($item_detail as $item) {
@@ -139,9 +145,13 @@ function process_delete_message($userId, $number_list) {
         $msg .= $item;
     }
     if($msg != "") {
-        $sharedInfo = get_list_shared_info($userId, $listId);
-        if(count($sharedInfo) > 0) {
+        if(count($shareInfo) > 0) {
             set_notification("UPDATE", $userId, $listId);
+        } else {
+            $sharedInfo = get_list_shared_info($userId, $listId);
+            if(count($sharedInfo) > 0) {
+                set_notification("UPDATE", $userId, $listId);
+            }
         }
         return [$msg, get_list_for_user($userId)];
     }
