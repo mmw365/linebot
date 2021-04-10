@@ -10,10 +10,10 @@ function handle_notification($notification) {
         $ret = [];
         $listContent = "リストが更新されました\n" . get_list_for_user($userId);
         
-        $shareInfo = get_list_share_info($userId, $listId);
-        if(count($shareInfo) > 0) {
-            $tmpUserId = $shareInfo["refUserId"];
-            $tmpListId = $shareInfo["refListId"];
+        $refInfo = get_list_referencing_info($userId, $listId);
+        if(count($refInfo) > 0) {
+            $tmpUserId = $refInfo["refUserId"];
+            $tmpListId = $refInfo["refListId"];
             $selectedListId = get_list_id_selected($tmpUserId);
             if($tmpListId == $selectedListId) {
                 $ret[] = [

@@ -60,14 +60,14 @@ function process_message($userId, $message_text) {
 
 function process_add_message($userId, $message_text) {
     $listId = get_list_id_selected($userId);
-    $shareInfo = get_list_share_info($userId, $listId);
-    if(count($shareInfo) > 0) {
-        $retMsg = add_item($shareInfo["refUserId"], $shareInfo["refListId"], $message_text);
+    $refInfo = get_list_referencing_info($userId, $listId);
+    if(count($refInfo) > 0) {
+        $retMsg = add_item($refInfo["refUserId"], $refInfo["refListId"], $message_text);
     } else {
         $retMsg = add_item($userId, $listId, $message_text);
     }
     if($retMsg == "") {
-        if(count($shareInfo) > 0) {
+        if(count($refInfo) > 0) {
             set_notification("UPDATE", $userId, $listId);
         } else {
             $sharedInfo = get_list_shared_info($userId, $listId);
@@ -83,8 +83,8 @@ function process_add_message($userId, $message_text) {
 
 function process_pass_code($userId, $message_text) {
     $listId = get_list_id_selected($userId);
-    $shareInfo = get_list_share_info($userId, $listId);
-    if(count($shareInfo) > 0) {
+    $refInfo = get_list_referencing_info($userId, $listId);
+    if(count($refInfo) > 0) {
         return ["共有リストを使用（参照）中です\n解除するか他のリストを選択してください"];
     }
     $sharedInfo = get_list_shared_info($userId, $listId);
@@ -113,8 +113,8 @@ function process_select_list_message($userId, $listId, $listName) {
     }
     change_selected_list($userId, $listId);
     $ret = ["「リスト${listId}" . ($listName == "" ? "" : "（${listName}）") . "」に切替えました"];
-    $shareInfo = get_list_share_info($userId, $listId);
-    if(count($shareInfo) > 0) {
+    $refInfo = get_list_referencing_info($userId, $listId);
+    if(count($refInfo) > 0) {
         $ret[0] .= "\n※リスト${listId}は共有（参照中）のリストです";
     }
     $sharedInfo = get_list_shared_info($userId, $listId);
@@ -127,9 +127,9 @@ function process_select_list_message($userId, $listId, $listName) {
 
 function process_delete_message($userId, $number_list) {
     $listId = get_list_id_selected($userId);
-    $shareInfo = get_list_share_info($userId, $listId);
-    if(count($shareInfo) > 0) {
-        $item_detail = delete_items_by_number($shareInfo["refUserId"], $shareInfo["refListId"], $number_list);
+    $refInfo = get_list_referencing_info($userId, $listId);
+    if(count($refInfo) > 0) {
+        $item_detail = delete_items_by_number($refInfo["refUserId"], $refInfo["refListId"], $number_list);
     } else {
         $item_detail = delete_items_by_number($userId, $listId, $number_list);
     }        
@@ -145,7 +145,7 @@ function process_delete_message($userId, $number_list) {
         $msg .= $item;
     }
     if($msg != "") {
-        if(count($shareInfo) > 0) {
+        if(count($refInfo) > 0) {
             set_notification("UPDATE", $userId, $listId);
         } else {
             $sharedInfo = get_list_shared_info($userId, $listId);
@@ -160,8 +160,8 @@ function process_delete_message($userId, $number_list) {
 
 function process_clear_message($userId) {
     $listId = get_list_id_selected($userId);
-    $shareInfo = get_list_share_info($userId, $listId);
-    if(count($shareInfo) > 0) {
+    $refInfo = get_list_referencing_info($userId, $listId);
+    if(count($refInfo) > 0) {
         return ["共有リストは変更できません"];
     }
     delete_all_items($userId, $listId);
@@ -175,10 +175,10 @@ function process_clear_message($userId) {
 
 function process_unshare_message($userId) {
     $listId = get_list_id_selected($userId);
-    $shareInfo = get_list_share_info($userId, $listId);
-    if(count($shareInfo) > 0) {
+    $refInfo = get_list_referencing_info($userId, $listId);
+    if(count($refInfo) > 0) {
         delete_share_info($userId, $listId);
-        set_notification("UNSHARE-SUB", $shareInfo["refUserId"], $shareInfo["refListId"]);
+        set_notification("UNSHARE-SUB", $refInfo["refUserId"], $refInfo["refListId"]);
         return ["共有を解除しました"];
     }
     $sharedInfo = get_list_shared_info($userId, $listId);
@@ -194,8 +194,8 @@ function process_unshare_message($userId) {
 
 function process_share_message($userId) {
     $listId = get_list_id_selected($userId);
-    $shareInfo = get_list_share_info($userId, $listId);
-    if(count($shareInfo) > 0) {
+    $refInfo = get_list_referencing_info($userId, $listId);
+    if(count($refInfo) > 0) {
         return ["共有リストは共有できません"];
     }
     $code = create_pass_code(12);

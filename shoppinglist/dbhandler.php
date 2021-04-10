@@ -48,18 +48,18 @@ function get_list_id_selected($userId) {
     return $listId;
 }
 
-function get_list_share_info($userId, $listId) {
+function get_list_referencing_info($userId, $listId) {
     global $servername, $dbuser, $dbpass, $dbname;
     $mysqli = new mysqli($servername, $dbuser, $dbpass, $dbname);
     if ($mysqli->connect_errno) {
         exit();
     }
-    $shareInfo = [];
+    $refInfo = [];
     $sql = "select refUserId, refListId from shopping_list_share_info where userId='$userId' and listId=$listId";
     if ($result = $mysqli->query($sql)) {
         if ($result->num_rows > 0) {
             $row = $result->fetch_array(MYSQLI_NUM);
-            $shareInfo = [
+            $refInfo = [
                 "refUserId" => $row[0],
                 "refListId" => $row[1]
             ];
@@ -67,7 +67,7 @@ function get_list_share_info($userId, $listId) {
         $result->free();
     }
     $mysqli->close();
-    return $shareInfo;
+    return $refInfo;
 }
 
 function get_list_share_code($userId, $code) {
@@ -79,13 +79,13 @@ function get_list_share_code($userId, $code) {
     $sql = "delete from shopping_list_share_code where deadLine < Now()";
     $mysqli->query($sql);
     
-    $shareInfo = [];
+    $sharingInfo = [];
     //$sql = "select userId, listId from shopping_list_share_code where userId<>'$userId' and passCode='$code'";
     $sql = "select userId, listId from shopping_list_share_code where passCode='$code'";
     if ($result = $mysqli->query($sql)) {
         if ($result->num_rows > 0) {
             $row = $result->fetch_array(MYSQLI_NUM);
-            $shareInfo = [
+            $sharingInfo = [
                 "userId" => $row[0],
                 "listId" => $row[1]
             ];
@@ -93,7 +93,7 @@ function get_list_share_code($userId, $code) {
         $result->free();
     }
     $mysqli->close();
-    return $shareInfo;
+    return $sharingInfo;
 }
 
 function get_list_shared_info($userId, $listId) {
@@ -271,10 +271,10 @@ function add_item($userId, $listId, $itemName) {
 
 function list_items_for_user($userId) {
     $listId = get_list_id_selected($userId);
-    $shareInfo = get_list_share_info($userId, $listId);
-    if(count($shareInfo) > 0) {
-        $userId = $shareInfo["refUserId"];
-        $listId = $shareInfo["refListId"];
+    $refInfo = get_list_referencing_info($userId, $listId);
+    if(count($refInfo) > 0) {
+        $userId = $refInfo["refUserId"];
+        $listId = $refInfo["refListId"];
     }
     global $servername, $dbuser, $dbpass, $dbname;
     $mysqli = new mysqli($servername, $dbuser, $dbpass, $dbname);
