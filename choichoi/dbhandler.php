@@ -291,3 +291,68 @@ function get_answer($quizId, $quizNum) {
     $mysqli->close();
     return $question;
 }
+
+function refresh_quiz_category($category_data) {
+    global $servername, $dbuser, $dbpass, $dbname;
+    $mysqli = new mysqli($servername, $dbuser, $dbpass, $dbname);
+    if ($mysqli->connect_errno) {
+        exit();
+    }
+    
+    $sql = "truncate table quizbot_category;";
+    $mysqli->query($sql);
+    foreach($category_data as $dat) {
+        $sql = "insert into quizbot_category values ($dat[0], '$dat[1]');";
+        $mysqli->query($sql);
+    }
+    $mysqli->close();
+}
+
+function refresh_quiz_subategory($subcategory_data) {
+    global $servername, $dbuser, $dbpass, $dbname;
+    $mysqli = new mysqli($servername, $dbuser, $dbpass, $dbname);
+    if ($mysqli->connect_errno) {
+        exit();
+    }
+    
+    $sql = "truncate table quizbot_sub_category;";
+    $mysqli->query($sql);
+    foreach($subcategory_data as $dat) {
+        $sql = "insert into quizbot_sub_category values ($dat[0], '$dat[1]', $dat[2], $dat[3]);";
+        $mysqli->query($sql);
+    }
+    $mysqli->close();
+}
+
+function refresh_quiz($quiz_data) {
+    global $servername, $dbuser, $dbpass, $dbname;
+    $mysqli = new mysqli($servername, $dbuser, $dbpass, $dbname);
+    if ($mysqli->connect_errno) {
+        exit();
+    }
+    
+    $sql = "truncate table quizbot_quiz;";
+    $mysqli->query($sql);
+    foreach($quiz_data as $dat) {
+        $sql = "insert into quizbot_quiz values ($dat[0], '$dat[1]', $dat[2], $dat[3]);";
+        $mysqli->query($sql);
+    }
+    $mysqli->close();
+}
+
+
+function refresh_quiz_question($question_data) {
+    global $servername, $dbuser, $dbpass, $dbname;
+    $mysqli = new mysqli($servername, $dbuser, $dbpass, $dbname);
+    if ($mysqli->connect_errno) {
+        exit();
+    }
+    
+    $sql = "truncate table quizbot_question;";
+    $mysqli->query($sql);
+    foreach($question_data as $dat) {
+        $sql = "insert into quizbot_question values ($dat[0], $dat[1], '$dat[2]', '$dat[3]', '$dat[4]', '$dat[5]', '$dat[6]', $dat[7], '$dat[8]');";
+        $mysqli->query($sql);
+    }
+    $mysqli->close();
+}

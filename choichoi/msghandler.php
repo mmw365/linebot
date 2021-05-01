@@ -60,6 +60,12 @@ function handle_init_status($userId, $message_text) {
     }
     update_session($userId, "CATSELECT", $categoryId, 0, 0, 0, 0);
     $subcategories = get_subcategories($categoryId);
+    if(count($subcategories) == 1) {
+        $subcategoryId =$subcategories[0]["subcategoryId"];
+        update_session($userId, "SUBCATSELECT", $categoryId, $subcategoryId, 0, 0, 0);
+        $quizes = get_quizes($subcategoryId);
+        return create_quizselect_msg($quizes);
+    }
     return create_subcatselect_msg($subcategories);
 }
 
